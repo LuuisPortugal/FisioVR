@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_sessao_iniciar"
+            android:title="Iniciar Sessão" />
+        <item
+            android:id="@+id/nav_sessao_Lista"
+            android:title="Sessões Concluidas" />
+    </group>
+
+    <item android:title="Videos">
+        <menu>
+            <item
+                android:id="@+id/nav_videos_novos"
+                android:title="Novos" />
+            <item
+                android:id="@+id/nav_videos_salvos"
+                android:title="Salvos" />
+        </menu>
+    </item>
+
+    <item android:title="Pessoas">
+        <menu>
+            <item
+                android:id="@+id/nav_pessoas_fisioterapeutas"
+                android:title="Fisioterapeutas" />
+            <item
+                android:id="@+id/nav_pessoas_pacientes"
+                android:title="Pacientes" />
+        </menu>
+    </item>
+</menu>
