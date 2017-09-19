@@ -68,32 +68,22 @@ public class home extends AppCompatActivity
     private View mLoginFormView;
 
     private View activity_login_include;
-    private View activity_item_list_include;
+    private View activity_content_home_include;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
-
         mEmailView = (TextView) findViewById(R.id.email);
         mPasswordView = (EditText) findViewById(R.id.password);
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
         activity_login_include = findViewById(R.id.activity_login_include);
-        activity_item_list_include = findViewById(R.id.activity_item_list_include);
+        activity_content_home_include = findViewById(R.id.activity_content_home_include);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -139,10 +129,14 @@ public class home extends AppCompatActivity
     private void updateView(FirebaseUser user){
         if (user != null) {
             activity_login_include.setVisibility(View.GONE);
-            activity_item_list_include.setVisibility(View.VISIBLE);
+            activity_content_home_include.setVisibility(View.VISIBLE);
+
+            String nomeDisplay = user.getDisplayName();
+            ((TextView) findViewById(R.id.activity_content_home_include_text_view))
+                .setText(String.format("Bem vindo, %s", TextUtils.isEmpty(nomeDisplay) ? "nome não cadastrado" : nomeDisplay));
         } else {
             activity_login_include.setVisibility(View.VISIBLE);
-            activity_item_list_include.setVisibility(View.GONE);
+            activity_content_home_include.setVisibility(View.GONE);
         }
     }
 
@@ -233,12 +227,14 @@ public class home extends AppCompatActivity
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         showProgress(false);
                         if (!task.isSuccessful()) {
-                            mPasswordView.setError(task.getException().getMessage());
-                            mPasswordView.requestFocus();
+                            Toast.makeText(home.this, task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                            mEmailView.requestFocus();
                         }
                     }
                 });
         }
+
+        mPasswordView.setText("");
     }
 
     //Mostra o carregando
@@ -311,7 +307,10 @@ public class home extends AppCompatActivity
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             if(mAuth != null){
+                mEmailView.setText(mAuth.getCurrentUser().getEmail());
+
                 mAuth.signOut();
+                mPasswordView.requestFocus();
             }
         }
 

@@ -13,8 +13,22 @@
     tools:context="br.cesupa.fisiovr.home"
     tools:showIn="@layout/app_bar_home">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Hello World!" />
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center_vertical|center_horizontal|center">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/activity_content_home_include_text_view"
+            android:textSize="40sp"
+            android:textAlignment="center"
+            android:textStyle="normal|bold"
+            android:gravity="center_vertical|center_horizontal|center"
+            android:typeface="sans"
+            android:textAllCaps="false" />
+    </LinearLayout>
+
 </RelativeLayout>
