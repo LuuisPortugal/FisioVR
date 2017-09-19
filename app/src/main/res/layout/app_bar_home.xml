@@ -21,7 +21,11 @@
 
     </android.support.design.widget.AppBarLayout>
 
-    <include layout="@layout/activity_item_list" />
+    <include android:id="@+id/activity_login_include"
+        layout="@layout/activity_login" />
+
+    <include android:id="@+id/activity_item_list_include"
+        layout="@layout/item_list" />
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fab"

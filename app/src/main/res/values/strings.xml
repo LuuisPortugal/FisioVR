@@ -4,5 +4,16 @@
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
-    <string name="action_settings">Settings</string>
+    <string name="action_settings">Sair</string>
+
+    <string name="prompt_email">Email</string>
+    <string name="prompt_password">Senha</string>
+    <string name="action_sign_in">Carregar Dados</string>
+    <string name="action_sign_in_short">Carreqar</string>
+    <string name="error_invalid_email">Email está Inválido</string>
+    <string name="error_invalid_password">Senha está Curta</string>
+    <string name="error_incorrect_password">Senha está Inválida</string>
+    <string name="error_field_required">Esse campo é Obrigatório</string>
+    <string name="permission_rationale">"As permissões de contatos são necessárias para fornecer o preenchimento de e-mail."</string>
+    <string name="error_non_logged">Você precisa está logado</string>
 </resources>

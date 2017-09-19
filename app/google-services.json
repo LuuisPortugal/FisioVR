@@ -1,0 +1,58 @@
+{
+  "project_info": {
+    "project_number": "26877664859",
+    "firebase_url": "https://fisiovr-29d4c.firebaseio.com",
+    "project_id": "fisiovr-29d4c",
+    "storage_bucket": "fisiovr-29d4c.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:26877664859:android:0bf8c9b255d98367",
+        "android_client_info": {
+          "package_name": "br.cesupa.fisiovr"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "26877664859-f4thsjkhgve2ss4fqd2oqsban8fkqjnq.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "br.cesupa.fisiovr",
+            "certificate_hash": "ef10ce72a1a9c7331db121887cfe8190b6b07a8e"
+          }
+        },
+        {
+          "client_id": "26877664859-rpbe6htnsahlt1938d5p0s4ggghj99th.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBNrXJScEptc1iYYE4Zy99N8j9rMyU0HBw"
+        },
+        {
+          "current_key": "AIzaSyDTVYADJUezAG7Z-rKcJRrDPD_PVxPNe7Q"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "26877664859-rpbe6htnsahlt1938d5p0s4ggghj99th.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
