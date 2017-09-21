@@ -54,6 +54,7 @@ import br.cesupa.fisiovr.list.FisioterapeutaListActivity;
 import br.cesupa.fisiovr.list.PacienteListActivity;
 import br.cesupa.fisiovr.list.SessaoListActivity;
 import br.cesupa.fisiovr.list.VideoListActivity;
+import br.cesupa.fisiovr.util.Util;
 
 import static android.Manifest.permission.READ_CONTACTS;
 
@@ -220,12 +221,12 @@ public class home extends AppCompatActivity
         if (cancel) {
             focusView.requestFocus();
         } else {
-            showProgress(true);
+            Util.showProgress(this, mLoginFormView, mProgressView, true);
             mAuth.signInWithEmailAndPassword(mEmailView.getText().toString(), mPasswordView.getText().toString())
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
-                        showProgress(false);
+                        Util.showProgress(home.this, mLoginFormView, mProgressView, true);
                         if (!task.isSuccessful()) {
                             Toast.makeText(home.this, task.getException().getMessage(), Toast.LENGTH_SHORT).show();
                             mEmailView.requestFocus();
@@ -235,35 +236,6 @@ public class home extends AppCompatActivity
         }
 
         mPasswordView.setText("");
-    }
-
-    //Mostra o carregando
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
-    private void showProgress(final boolean show) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
-            int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
-
-            mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
-            mLoginFormView.animate().setDuration(shortAnimTime).alpha(
-                    show ? 0 : 1).setListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
-                }
-            });
-
-            mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
-            mProgressView.animate().setDuration(shortAnimTime).alpha(
-                    show ? 1 : 0).setListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
-                }
-            });
-        } else {
-            mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
-            mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
-        }
     }
 
     @Override

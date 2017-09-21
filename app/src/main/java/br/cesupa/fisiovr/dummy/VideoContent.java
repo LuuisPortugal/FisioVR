@@ -15,6 +15,7 @@ import com.android.volley.toolbox.DiskBasedCache;
 import com.android.volley.toolbox.HurlStack;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.google.gson.Gson;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -39,19 +40,35 @@ public class VideoContent {
     public static final Map<String, VideoItem> ITEM_MAP = new HashMap<String, VideoItem>();
 
     public static class VideoItem {
-        public final String id;
-        public final String content;
-        public final String details;
+        public String id;
+        public String title;
+        public String thumbnail;
+        public String upload_date;
+        public Integer view_count;
+        public List<String> tags;
+        public List<String> categories;
+        public String description;
+        public String uploader_id;
+        public String uploader;
 
-        public VideoItem(String id, String content, String details) {
+        public VideoItem(){}
+
+        public VideoItem(String id, String title, String thumbnail, String upload_date, Integer view_count, ArrayList<String> tags, ArrayList<String> categories, String description, String uploader_id, String uploader) {
             this.id = id;
-            this.content = content;
-            this.details = details;
+            this.title = title;
+            this.thumbnail = thumbnail;
+            this.upload_date = upload_date;
+            this.view_count = view_count;
+            this.tags = tags;
+            this.categories = categories;
+            this.description = description;
+            this.uploader_id = uploader_id;
+            this.uploader = uploader;
         }
 
         @Override
         public String toString() {
-            return content;
+            return new Gson().toJson(this);
         }
     }
 }

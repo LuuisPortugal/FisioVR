@@ -104,6 +104,10 @@
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="br.cesupa.fisiovr.home" />
+            <meta-data
+                android:name="android.support.v7.Sea"
+                android:resource="@xml/searchable">
+            </meta-data>
         </activity>
         <activity
             android:name=".detail.VideoDetailActivity"

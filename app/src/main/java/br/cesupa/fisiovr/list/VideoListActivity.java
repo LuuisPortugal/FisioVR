@@ -1,5 +1,7 @@
 package br.cesupa.fisiovr.list;
 
+import android.app.SearchManager;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -9,8 +11,11 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
 import android.util.Log;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
@@ -26,11 +31,21 @@ import com.android.volley.toolbox.BasicNetwork;
 import com.android.volley.toolbox.DiskBasedCache;
 import com.android.volley.toolbox.HurlStack;
 import com.android.volley.toolbox.JsonArrayRequest;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.GenericTypeIndicator;
+import com.google.firebase.database.ValueEventListener;
 import com.google.gson.Gson;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 import br.cesupa.fisiovr.R;
 import br.cesupa.fisiovr.adapter.SimpleFisioterapeutaRecyclerViewAdapter;
@@ -39,6 +54,9 @@ import br.cesupa.fisiovr.dummy.DummyContent;
 import br.cesupa.fisiovr.dummy.VideoContent;
 import br.cesupa.fisiovr.home;
 import br.cesupa.fisiovr.util.Util;
+import br.com.zbra.androidlinq.Linq;
+import br.com.zbra.androidlinq.delegate.Predicate;
+import br.com.zbra.androidlinq.delegate.Selector;
 
 /**
  * An activity representing a single Item detail screen. This
@@ -46,7 +64,7 @@ import br.cesupa.fisiovr.util.Util;
  * item details are presented side-by-side with a list of items
  * in a {@link home}.
  */
-public class VideoListActivity extends AppCompatActivity {
+public class VideoListActivity extends AppCompatActivity implements SearchView.OnQueryTextListener, ValueEventListener, SwipeRefreshLayout.OnRefreshListener {
 
     public static final String TAG_VIDEOS_CACHE = "tag_videos_cache";
 
@@ -58,104 +76,129 @@ public class VideoListActivity extends AppCompatActivity {
 
     RecyclerView video_recycleview;
 
-    Cache cache;
-
-    SharedPreferences settingsVideoListActivity;
-
     SwipeRefreshLayout swipe_video_list_activity;
+
+    FirebaseDatabase database;
+
+    DatabaseReference tableDatabase;
+
+    List<VideoContent.VideoItem> videos;
+
+    SearchView searchView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_video_list);
 
-        settingsVideoListActivity = getSharedPreferences(getClass().getName(), 0);
-
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_video_list_activity);
         setSupportActionBar(toolbar);
 
-        // Show the Up button in the action bar.
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
-            String titleActionBar = "Vídeos";
-            if(getIntent().hasExtra(TAG_VIDEOS_TYPE)){
-                switch (getIntent().getIntExtra(TAG_VIDEOS_TYPE, -1)){
-                    case NEW_VIDEOS_TYPE: titleActionBar = "Novos Vídeos"; break;
-                    case SAVED_VIDEOS_TYPE: titleActionBar = "Vídeos Salvos"; break;
-                }
-            }
-
-            actionBar.setTitle(titleActionBar);
+            actionBar.setTitle("Vídeos");
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
 
         swipe_video_list_activity = (SwipeRefreshLayout) findViewById(R.id.swipe_video_list_activity);
-        swipe_video_list_activity.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                if(Util.isConnect(VideoListActivity.this)) {
-                    getVideos();
-                }
-            }
-        });
+        swipe_video_list_activity.setOnRefreshListener(this);
+
+        database = FirebaseDatabase.getInstance();
+        tableDatabase = database.getReference("videos");
 
         video_recycleview = (RecyclerView) findViewById(R.id.video_recycleview);
-        video_recycleview.setAdapter(new SimpleVideoRecyclerViewAdapter());
-        if(Util.isConnect(this)) {
-            if(settingsVideoListActivity.contains(TAG_VIDEOS_CACHE)){
-                populateRecycleView();
-            }else{
-                getVideos();
-            }
-        }
+        getVideos();
     }
 
-    private void getVideos(){
-        cache = new DiskBasedCache(getCacheDir());
-        Network network = new BasicNetwork(new HurlStack());
-        RequestQueue mRequestQueue = new RequestQueue(cache, network);
-
-        mRequestQueue.start();
-        mRequestQueue.add(new JsonArrayRequest(Request.Method.GET, "https://jsonplaceholder.typicode.com/comments", null, new Response.Listener<JSONArray>() {
-            @Override
-            public void onResponse(JSONArray response) {
-                SharedPreferences.Editor editorSettingsVideoListActivity = settingsVideoListActivity.edit();
-                editorSettingsVideoListActivity.putString(TAG_VIDEOS_CACHE, response.toString());
-                editorSettingsVideoListActivity.apply();
-
-                populateRecycleView();
-                cache.clear();
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Toast.makeText(VideoListActivity.this, error.getMessage(), Toast.LENGTH_LONG).show();
-                cache.clear();
-                error.printStackTrace();
-            }
-        }));
+    private void getVideos() {
+        swipe_video_list_activity.setRefreshing(true);
+        tableDatabase.addValueEventListener(this);
     }
 
-    private void populateRecycleView(){
-        try {
-            JSONArray response = new JSONArray(settingsVideoListActivity.getString(TAG_VIDEOS_CACHE, null));
-            SimpleVideoRecyclerViewAdapter adapter = new SimpleVideoRecyclerViewAdapter();
-            for(int i = 0; i < response.length(); i++){
-                JSONObject repo = response.getJSONObject(i);
-                adapter.addItem(new VideoContent.VideoItem(
-                        repo.getString("id"),
-                        repo.getString("name"),
-                        repo.getString("email") + "\n" + repo.getString("body")
-                ));
-            }
-
+    private void updateAdapterByQuery(final String query) {
+        if (TextUtils.isEmpty(query)) {
+            SimpleVideoRecyclerViewAdapter adapter = new SimpleVideoRecyclerViewAdapter(videos);
             video_recycleview.setAdapter(adapter);
-            if(swipe_video_list_activity.isRefreshing())
-                swipe_video_list_activity.setRefreshing(false);
-
-        } catch (JSONException e) {
-            Log.e(getClass().getName(), e.getMessage());
-            e.printStackTrace();
+        } else {
+            List<VideoContent.VideoItem> videosForQuery = videos;
+            SimpleVideoRecyclerViewAdapter adapter = new SimpleVideoRecyclerViewAdapter(
+                Linq.stream(videosForQuery)
+                    .where(new Predicate<VideoContent.VideoItem>() {
+                        @Override
+                        public boolean apply(VideoContent.VideoItem videoItem) {
+                            return videoItem.title.toLowerCase().contains(query.toLowerCase());
+                        }
+                    })
+                    .orderBy(new Selector<VideoContent.VideoItem, String>() {
+                        @Override
+                        public String select(VideoContent.VideoItem videoItem) {
+                            return videoItem.title;
+                        }
+                    })
+                    .toList()
+            );
+            video_recycleview.setAdapter(adapter);
         }
+    }
+
+    @Override
+    public void onRefresh() {
+        getVideos();
+    }
+
+    @Override
+    public void onDataChange(DataSnapshot dataSnapshot) {
+        videos = Linq.stream(
+            dataSnapshot
+                .getValue(new GenericTypeIndicator<HashMap<String, VideoContent.VideoItem>>() {})
+                .values()
+        )
+        .orderBy(new Selector<VideoContent.VideoItem, String>() {
+            @Override
+            public String select(VideoContent.VideoItem videoItem) {
+                return videoItem.title;
+            }
+        }).toList();
+
+        String querySearch = searchView != null ? searchView.getQuery().toString() : "";
+        updateAdapterByQuery(querySearch);
+        swipe_video_list_activity.setRefreshing(false);
+    }
+
+    @Override
+    public void onCancelled(DatabaseError error) {
+        Toast.makeText(VideoListActivity.this, error.toException().getMessage(), Toast.LENGTH_SHORT).show();
+        swipe_video_list_activity.setRefreshing(false);
+    }
+
+    @Override
+    public boolean onQueryTextSubmit(String query) {
+        return false;
+    }
+
+    @Override
+    public boolean onQueryTextChange(final String newText) {
+        updateAdapterByQuery(newText);
+        return false;
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.videos, menu);
+
+        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+        searchView = (SearchView) menu.findItem(R.id.app_bar_search_videos).getActionView();
+        searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
+        searchView.setOnQueryTextListener(this);
+        return true;
+    }
+
+    @Override
+    protected void onDestroy(){
+        if(database != null){
+            database.goOffline();
+        }
+
+        super.onDestroy();
     }
 }

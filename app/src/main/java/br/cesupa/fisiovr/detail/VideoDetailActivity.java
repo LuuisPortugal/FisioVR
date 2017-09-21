@@ -60,8 +60,8 @@ public class VideoDetailActivity extends AppCompatActivity {
             mItem = gson.fromJson(getIntent().getExtras().getString(ARG_VIDEO_ID), VideoContent.VideoItem.class);
 
             if(mItem != null) {
-                actionBar.setTitle(mItem.content);
-                ((TextView) findViewById(R.id.text_view_video_detail_activity)).setText(mItem.details);
+                actionBar.setTitle(mItem.title);
+                ((TextView) findViewById(R.id.text_view_video_detail_activity)).setText(mItem.description);
             }
         }
     }

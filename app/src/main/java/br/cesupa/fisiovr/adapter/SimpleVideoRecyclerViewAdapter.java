@@ -12,6 +12,7 @@ import android.widget.Toast;
 import com.google.gson.Gson;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import br.cesupa.fisiovr.detail.ItemDetailActivity;
@@ -29,6 +30,10 @@ public class SimpleVideoRecyclerViewAdapter extends RecyclerView.Adapter<SimpleV
 
     public SimpleVideoRecyclerViewAdapter(){}
 
+    public SimpleVideoRecyclerViewAdapter(List<VideoContent.VideoItem> list){
+        this.mValues = list;
+    }
+
     public void addItem(VideoContent.VideoItem item) {
         mValues.add(item);
     }
@@ -36,15 +41,14 @@ public class SimpleVideoRecyclerViewAdapter extends RecyclerView.Adapter<SimpleV
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.item_list_content, parent, false);
+                .inflate(R.layout.video_list_content, parent, false);
         return new ViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
         holder.mItem = mValues.get(position);
-        holder.mIdView.setText(mValues.get(position).id);
-        holder.mContentView.setText(mValues.get(position).content);
+        holder.mContentView.setText(mValues.get(position).title);
 
         holder.mView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -67,15 +71,13 @@ public class SimpleVideoRecyclerViewAdapter extends RecyclerView.Adapter<SimpleV
 
     class ViewHolder extends RecyclerView.ViewHolder {
         final View mView;
-        final TextView mIdView;
         final TextView mContentView;
         public VideoContent.VideoItem mItem;
 
         ViewHolder(View view) {
             super(view);
             mView = view;
-            mIdView = (TextView) view.findViewById(R.id.id);
-            mContentView = (TextView) view.findViewById(R.id.content);
+            mContentView = (TextView) view.findViewById(R.id.title);
         }
 
         @Override

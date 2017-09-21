@@ -38,7 +38,7 @@
                 android:layout_height="match_parent"
                 app:layoutManager="LinearLayoutManager"
                 tools:context="br.cesupa.fisiovr.detail.VideoDetailActivity"
-                tools:listitem="@layout/item_list_content" />
+                tools:listitem="@layout/video_list_content" />
         </android.support.v4.widget.SwipeRefreshLayout>
     </FrameLayout>
 
