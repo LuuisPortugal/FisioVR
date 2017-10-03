@@ -1,15 +1,22 @@
 package br.cesupa.fisiovr.adapter;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
+import com.squareup.picasso.Picasso;
+
+import junit.framework.Test;
+
+import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -25,6 +32,8 @@ import br.cesupa.fisiovr.dummy.VideoContent;
  */
 
 public class SimpleVideoRecyclerViewAdapter extends RecyclerView.Adapter<SimpleVideoRecyclerViewAdapter.ViewHolder> {
+
+    private Context c;
 
     private List<VideoContent.VideoItem> mValues = new ArrayList<VideoContent.VideoItem>();
 
@@ -42,13 +51,23 @@ public class SimpleVideoRecyclerViewAdapter extends RecyclerView.Adapter<SimpleV
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.video_list_content, parent, false);
+
+        this.c = parent.getContext();
+
         return new ViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
         holder.mItem = mValues.get(position);
-        holder.mContentView.setText(mValues.get(position).title);
+
+        Picasso.with(this.c)
+                .load(mValues.get(position).thumbnail)
+                .into(holder.image);
+
+        holder.title.setText(mValues.get(position).title);
+        holder.description.setText(mValues.get(position).description);
+        holder.views.setText(mValues.get(position).view_count);
 
         holder.mView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -71,18 +90,24 @@ public class SimpleVideoRecyclerViewAdapter extends RecyclerView.Adapter<SimpleV
 
     class ViewHolder extends RecyclerView.ViewHolder {
         final View mView;
-        final TextView mContentView;
+        final ImageView image;
+        final TextView title;
+        final TextView description;
+        final TextView views;
         public VideoContent.VideoItem mItem;
 
-        ViewHolder(View view) {
-            super(view);
-            mView = view;
-            mContentView = (TextView) view.findViewById(R.id.title);
+        ViewHolder(View itemView) {
+            super(itemView);
+            this.mView = itemView;
+            this.image = (ImageView) itemView.findViewById(R.id.imageVideo);
+            this.title = (TextView) itemView.findViewById(R.id.titleVideo);
+            this.description = (TextView) itemView.findViewById(R.id.descriptionVideo);
+            this.views = (TextView) itemView.findViewById(R.id.viewsVideo);
         }
 
         @Override
         public String toString() {
-            return super.toString() + " '" + mContentView.getText() + "'";
+            return super.toString();
         }
     }
 }
