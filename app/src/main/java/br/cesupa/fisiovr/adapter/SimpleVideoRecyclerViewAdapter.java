@@ -2,34 +2,23 @@ package br.cesupa.fisiovr.adapter;
 
 import android.content.Context;
 import android.content.Intent;
-import android.os.Bundle;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.squareup.picasso.Picasso;
 
-import junit.framework.Test;
-
-import org.w3c.dom.Text;
-
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
-import br.cesupa.fisiovr.detail.ItemDetailActivity;
 import br.cesupa.fisiovr.R;
 import br.cesupa.fisiovr.detail.VideoDetailActivity;
 import br.cesupa.fisiovr.dummy.VideoContent;
-
-/**
- * Created by luis.portugal on 01/08/2017.
- */
+import br.cesupa.fisiovr.util.CircleTransform;
 
 public class SimpleVideoRecyclerViewAdapter extends RecyclerView.Adapter<SimpleVideoRecyclerViewAdapter.ViewHolder> {
 
@@ -37,9 +26,10 @@ public class SimpleVideoRecyclerViewAdapter extends RecyclerView.Adapter<SimpleV
 
     private List<VideoContent.VideoItem> mValues = new ArrayList<VideoContent.VideoItem>();
 
-    public SimpleVideoRecyclerViewAdapter(){}
+    public SimpleVideoRecyclerViewAdapter() {
+    }
 
-    public SimpleVideoRecyclerViewAdapter(List<VideoContent.VideoItem> list){
+    public SimpleVideoRecyclerViewAdapter(List<VideoContent.VideoItem> list) {
         this.mValues = list;
     }
 
@@ -53,7 +43,6 @@ public class SimpleVideoRecyclerViewAdapter extends RecyclerView.Adapter<SimpleV
                 .inflate(R.layout.video_list_content, parent, false);
 
         this.c = parent.getContext();
-
         return new ViewHolder(view);
     }
 
@@ -63,11 +52,13 @@ public class SimpleVideoRecyclerViewAdapter extends RecyclerView.Adapter<SimpleV
 
         Picasso.with(this.c)
                 .load(mValues.get(position).thumbnail)
+                .resize(180, 180)
+                .centerCrop()
+                .transform(new CircleTransform())
                 .into(holder.image);
 
         holder.title.setText(mValues.get(position).title);
-        holder.description.setText(mValues.get(position).description);
-        holder.views.setText(mValues.get(position).view_count);
+        holder.autor.setText(mValues.get(position).uploader);
 
         holder.mView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -92,8 +83,7 @@ public class SimpleVideoRecyclerViewAdapter extends RecyclerView.Adapter<SimpleV
         final View mView;
         final ImageView image;
         final TextView title;
-        final TextView description;
-        final TextView views;
+        final TextView autor;
         public VideoContent.VideoItem mItem;
 
         ViewHolder(View itemView) {
@@ -101,8 +91,7 @@ public class SimpleVideoRecyclerViewAdapter extends RecyclerView.Adapter<SimpleV
             this.mView = itemView;
             this.image = (ImageView) itemView.findViewById(R.id.imageVideo);
             this.title = (TextView) itemView.findViewById(R.id.titleVideo);
-            this.description = (TextView) itemView.findViewById(R.id.descriptionVideo);
-            this.views = (TextView) itemView.findViewById(R.id.viewsVideo);
+            this.autor = (TextView) itemView.findViewById(R.id.autorVideo);
         }
 
         @Override

@@ -1,55 +1,57 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="wrap_content"
+    android:id="@+id/conteiner_item_video_list_content"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal"
-    android:elevation="10dp">
+    android:elevation="20dp"
+    android:orientation="horizontal">
 
-    <android.support.v7.widget.CardView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_weight="1"
-        android:elevation="0dp"
-        android:padding="20dp">
 
-        <ImageView
-            app:srcCompat="@android:color/transparent"
-            android:id="@+id/imageVideo"
-            android:layout_weight="1"
-            android:padding="30dp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
 
         <LinearLayout
-            android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_weight="1">
+            android:orientation="horizontal">
 
-            <TextView
-                android:text="TextView"
-                android:layout_width="match_parent"
+            <ImageView
+                android:id="@+id/imageVideo"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:id="@+id/titleVideo"
-                android:textStyle="normal|bold"
-                android:textAllCaps="false"
-                android:textSize="24sp" />
-
-            <TextView
-                android:text="TextView"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:id="@+id/descriptionVideo" />
-
-            <TextView
-                android:text="TextView"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textAlignment="viewEnd"
-                android:id="@+id/viewsVideo" />
+                android:layout_centerHorizontal="true"
+                android:layout_centerVertical="true"
+                android:layout_gravity="center_vertical|center_horizontal"
+                android:layout_weight="1"
+                android:padding="5dip"
+                android:textAlignment="center" />
         </LinearLayout>
-    </android.support.v7.widget.CardView>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:padding="5dip">
+
+            <TextView
+                android:id="@+id/titleVideo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="TextView"
+                android:textAllCaps="false"
+                android:textSize="14sp"
+                android:textStyle="normal|bold" />
+
+            <TextView
+                android:id="@+id/autorVideo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="TextView" />
+
+        </LinearLayout>
+    </LinearLayout>
 
 </LinearLayout>

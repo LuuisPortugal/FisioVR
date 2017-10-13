@@ -1,24 +1,19 @@
 package br.cesupa.fisiovr.detail;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
 import com.google.gson.Gson;
 
 import br.cesupa.fisiovr.R;
-import br.cesupa.fisiovr.dummy.DummyContent;
 import br.cesupa.fisiovr.dummy.SessaoContent;
-import br.cesupa.fisiovr.dummy.VideoContent;
 import br.cesupa.fisiovr.home;
-import br.cesupa.fisiovr.list.SessaoListActivity;
 
 /**
  * An activity representing a single Item detail screen. This
@@ -59,7 +54,7 @@ public class SessaoDetailActivity extends AppCompatActivity {
             Gson gson = new Gson();
             mItem = gson.fromJson(getIntent().getExtras().getString(ARG_SESSAO_ID), SessaoContent.SessaoItem.class);
 
-            if(mItem != null) {
+            if (mItem != null) {
                 actionBar.setTitle(mItem.content);
                 ((TextView) findViewById(R.id.text_view_sessao_detail_activity)).setText(mItem.details);
             }

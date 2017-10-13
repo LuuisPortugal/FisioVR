@@ -7,15 +7,18 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Build;
+import android.support.annotation.NonNull;
 import android.view.View;
 import android.widget.Toast;
+
+import java.io.File;
 
 /**
  * Created by luis.portugal on 03/08/2017.
  */
 
 public class Util {
-    public static boolean isConnect(Context contexto){
+    public static boolean isConnect(Context contexto) {
         ConnectivityManager cm = (ConnectivityManager) contexto.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo netInfo = cm.getActiveNetworkInfo();
 
@@ -54,5 +57,15 @@ public class Util {
             view2.setVisibility(show ? View.VISIBLE : View.GONE);
             view1.setVisibility(show ? View.GONE : View.VISIBLE);
         }
+    }
+
+    public static File renameFile(@NonNull File from, @NonNull String newName) {
+        File directory = from.getParentFile();
+        File newFile = new File(directory, newName);
+        if (!from.renameTo(newFile)) {
+            return from;
+        }
+
+        return newFile;
     }
 }

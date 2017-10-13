@@ -9,8 +9,8 @@ import android.widget.TextView;
 
 import java.util.List;
 
-import br.cesupa.fisiovr.detail.ItemDetailActivity;
 import br.cesupa.fisiovr.R;
+import br.cesupa.fisiovr.detail.ItemDetailActivity;
 import br.cesupa.fisiovr.dummy.FisioterapeutaContent;
 
 /**

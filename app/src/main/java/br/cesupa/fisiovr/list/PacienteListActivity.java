@@ -1,21 +1,13 @@
 package br.cesupa.fisiovr.list;
 
-import android.content.Intent;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.view.MenuItem;
-import android.view.View;
-import android.widget.TextView;
 
 import br.cesupa.fisiovr.R;
-import br.cesupa.fisiovr.adapter.SimpleFisioterapeutaRecyclerViewAdapter;
 import br.cesupa.fisiovr.adapter.SimplePacienteRecyclerViewAdapter;
-import br.cesupa.fisiovr.dummy.DummyContent;
 import br.cesupa.fisiovr.home;
 
 /**

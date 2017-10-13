@@ -1,25 +1,6 @@
 package br.cesupa.fisiovr.dummy;
 
-import android.content.Context;
-import android.util.Log;
-import android.widget.Toast;
-
-import com.android.volley.Cache;
-import com.android.volley.Network;
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.BasicNetwork;
-import com.android.volley.toolbox.DiskBasedCache;
-import com.android.volley.toolbox.HurlStack;
-import com.android.volley.toolbox.JsonArrayRequest;
-import com.android.volley.toolbox.JsonObjectRequest;
 import com.google.gson.Gson;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -51,7 +32,8 @@ public class VideoContent {
         public String uploader_id;
         public String uploader;
 
-        public VideoItem(){}
+        public VideoItem() {
+        }
 
         public VideoItem(String id, String title, String thumbnail, String upload_date, Integer view_count, ArrayList<String> tags, ArrayList<String> categories, String description, String uploader_id, String uploader) {
             this.id = id;

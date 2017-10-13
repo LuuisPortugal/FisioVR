@@ -1,31 +1,13 @@
 package br.cesupa.fisiovr.list;
 
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.MenuItem;
-import android.view.View;
-import android.widget.TextView;
-import android.widget.Toast;
-
-import com.android.volley.Cache;
-import com.android.volley.Network;
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.BasicNetwork;
-import com.android.volley.toolbox.DiskBasedCache;
-import com.android.volley.toolbox.HurlStack;
-import com.android.volley.toolbox.JsonArrayRequest;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -49,7 +31,7 @@ public class SessaoListActivity extends AppCompatActivity {
 
     RecyclerView sessao_recycleview;
 
-    Cache cache;
+    //Cache cache;
 
     SharedPreferences settingsSessaoListActivity;
 
@@ -76,7 +58,7 @@ public class SessaoListActivity extends AppCompatActivity {
         swipe_sessao_list_activity.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                if(Util.isConnect(SessaoListActivity.this)) {
+                if (Util.isConnect(SessaoListActivity.this)) {
                     getSessoes();
                 }
             }
@@ -84,51 +66,53 @@ public class SessaoListActivity extends AppCompatActivity {
 
         sessao_recycleview = (RecyclerView) findViewById(R.id.sessao_recycleview);
         sessao_recycleview.setAdapter(new SimpleSessaoRecyclerViewAdapter());
-        if(Util.isConnect(this)) {
-            if(settingsSessaoListActivity.contains(TAG_SESSAO_CACHE)){
+        if (Util.isConnect(this)) {
+            if (settingsSessaoListActivity.contains(TAG_SESSAO_CACHE)) {
                 populateRecycleView();
-            }else{
+            } else {
                 getSessoes();
             }
         }
     }
 
-    private void getSessoes(){
-        cache = new DiskBasedCache(getCacheDir());
-        Network network = new BasicNetwork(new HurlStack());
-        RequestQueue mRequestQueue = new RequestQueue(cache, network);
-
-        mRequestQueue.start();
-        mRequestQueue.add(new JsonArrayRequest(Request.Method.GET, "https://jsonplaceholder.typicode.com/users", null, new Response.Listener<JSONArray>() {
-            @Override
-            public void onResponse(JSONArray response) {
-                SharedPreferences.Editor editorSettingsSessaoListActivity = settingsSessaoListActivity.edit();
-                editorSettingsSessaoListActivity.putString(TAG_SESSAO_CACHE, response.toString());
-                editorSettingsSessaoListActivity.apply();
-
-                populateRecycleView();
-                cache.clear();
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Toast.makeText(SessaoListActivity.this, error.getMessage(), Toast.LENGTH_LONG).show();
-                cache.clear();
-                error.printStackTrace();
-            }
-        }));
+    private void getSessoes() {
+//        cache = new DiskBasedCache(getCacheDir());
+//        Network network = new BasicNetwork(new HurlStack());
+//        RequestQueue mRequestQueue = new RequestQueue(cache, network);
+//
+//        mRequestQueue.start();
+//        mRequestQueue.add(new JsonArrayRequest(Request.Method.GET, "https://jsonplaceholder.typicode.com/users", null, new Response.Listener<JSONArray>() {
+//            @Override
+//            public void onResponse(JSONArray response) {
+//                SharedPreferences.Editor editorSettingsSessaoListActivity = settingsSessaoListActivity.edit();
+//                editorSettingsSessaoListActivity.putString(TAG_SESSAO_CACHE, response.toString());
+//                editorSettingsSessaoListActivity.apply();
+//
+//                populateRecycleView();
+//                cache.clear();
+//            }
+//        }, new Response.ErrorListener() {
+//            @Override
+//            public void onErrorResponse(VolleyError error) {
+//                Toast.makeText(SessaoListActivity.this, error.getMessage(), Toast.LENGTH_LONG).show();
+//                cache.clear();
+//                error.printStackTrace();
+//            }
+//        }));
     }
 
-    private void populateRecycleView(){
+    private void populateRecycleView() {
         try {
             JSONArray response = new JSONArray(settingsSessaoListActivity.getString(TAG_SESSAO_CACHE, null));
             SimpleSessaoRecyclerViewAdapter adapter = new SimpleSessaoRecyclerViewAdapter();
-            for(int i = 0; i < response.length(); i++){
+            for (int i = 0; i < response.length(); i++) {
                 JSONObject repo = response.getJSONObject(i);
 
                 StringBuilder detail = new StringBuilder();
-                detail.append(repo.getString("email")); detail.append("\n");
-                detail.append(repo.getString("phone")); detail.append("\n");
+                detail.append(repo.getString("email"));
+                detail.append("\n");
+                detail.append(repo.getString("phone"));
+                detail.append("\n");
 
                 detail.append(repo.getJSONObject("address").getString("street"));
                 detail.append(", ");
@@ -139,7 +123,8 @@ public class SessaoListActivity extends AppCompatActivity {
                 detail.append(repo.getJSONObject("address").getString("zipcode"));
                 detail.append("\n");
 
-                detail.append(repo.getString("website")); detail.append("\n");
+                detail.append(repo.getString("website"));
+                detail.append("\n");
 
                 detail.append(repo.getJSONObject("company").getString("name"));
                 detail.append(", ");
@@ -153,7 +138,7 @@ public class SessaoListActivity extends AppCompatActivity {
             }
 
             sessao_recycleview.setAdapter(adapter);
-            if(swipe_sessao_list_activity.isRefreshing())
+            if (swipe_sessao_list_activity.isRefreshing())
                 swipe_sessao_list_activity.setRefreshing(false);
 
         } catch (JSONException e) {

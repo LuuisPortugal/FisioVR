@@ -1,42 +1,22 @@
 package br.cesupa.fisiovr;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
-import android.annotation.TargetApi;
-import android.app.LoaderManager;
-import android.content.CursorLoader;
 import android.content.Intent;
-import android.content.Loader;
-import android.content.pm.PackageManager;
-import android.database.Cursor;
-import android.net.Uri;
-import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
-import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
-import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
-import android.support.design.widget.Snackbar;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
-import android.widget.ArrayAdapter;
-import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -46,17 +26,11 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import br.cesupa.fisiovr.adapter.SimpleItemRecyclerViewAdapter;
 import br.cesupa.fisiovr.list.FisioterapeutaListActivity;
 import br.cesupa.fisiovr.list.PacienteListActivity;
 import br.cesupa.fisiovr.list.SessaoListActivity;
 import br.cesupa.fisiovr.list.VideoListActivity;
 import br.cesupa.fisiovr.util.Util;
-
-import static android.Manifest.permission.READ_CONTACTS;
 
 public class home extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -127,14 +101,14 @@ public class home extends AppCompatActivity
     }
 
     //Atualiza as Views
-    private void updateView(FirebaseUser user){
+    private void updateView(FirebaseUser user) {
         if (user != null) {
             activity_login_include.setVisibility(View.GONE);
             activity_content_home_include.setVisibility(View.VISIBLE);
 
             String nomeDisplay = user.getDisplayName();
             ((TextView) findViewById(R.id.activity_content_home_include_text_view))
-                .setText(String.format("Bem vindo, %s", TextUtils.isEmpty(nomeDisplay) ? "nome não cadastrado" : nomeDisplay));
+                    .setText(String.format("Bem vindo, %s", TextUtils.isEmpty(nomeDisplay) ? "nome não cadastrado" : nomeDisplay));
         } else {
             activity_login_include.setVisibility(View.VISIBLE);
             activity_content_home_include.setVisibility(View.GONE);
@@ -144,7 +118,7 @@ public class home extends AppCompatActivity
     //Executa a ação de ir para outra pagina
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
-        if(mAuth.getCurrentUser() != null) {
+        if (mAuth.getCurrentUser() != null) {
             // Handle navigation view item clicks here.
             int id = item.getItemId();
 
@@ -153,21 +127,14 @@ public class home extends AppCompatActivity
             } else if (id == R.id.nav_sessao_Lista) {
                 startActivity(new Intent(this, SessaoListActivity.class));
             } else if (id == R.id.nav_videos_novos) {
-                Intent videoListIntent = new Intent(this, VideoListActivity.class);
-                videoListIntent.putExtra(VideoListActivity.TAG_VIDEOS_TYPE, VideoListActivity.NEW_VIDEOS_TYPE);
-
-                startActivity(videoListIntent);
+                startActivity(new Intent(this, VideoListActivity.class));
             } else if (id == R.id.nav_videos_salvos) {
-                Intent videoListIntent = new Intent(this, VideoListActivity.class);
-                videoListIntent.putExtra(VideoListActivity.TAG_VIDEOS_TYPE, VideoListActivity.SAVED_VIDEOS_TYPE);
-
-                startActivity(videoListIntent);
             } else if (id == R.id.nav_pessoas_fisioterapeutas) {
                 startActivity(new Intent(this, FisioterapeutaListActivity.class));
             } else if (id == R.id.nav_pessoas_pacientes) {
                 startActivity(new Intent(this, PacienteListActivity.class));
             }
-        }else{
+        } else {
             Toast.makeText(this, getString(R.string.error_non_logged), Toast.LENGTH_SHORT).show();
             mEmailView.requestFocus();
         }
@@ -198,11 +165,11 @@ public class home extends AppCompatActivity
         boolean cancel = false;
         View focusView = null;
 
-        if(TextUtils.isEmpty(password)){
+        if (TextUtils.isEmpty(password)) {
             mPasswordView.setError(getString(R.string.error_field_required));
             focusView = mPasswordView;
             cancel = true;
-        }else if (!isPasswordValid(password)) {
+        } else if (!isPasswordValid(password)) {
             mPasswordView.setError(getString(R.string.error_invalid_password));
             focusView = mPasswordView;
             cancel = true;
@@ -223,16 +190,16 @@ public class home extends AppCompatActivity
         } else {
             Util.showProgress(this, mLoginFormView, mProgressView, true);
             mAuth.signInWithEmailAndPassword(mEmailView.getText().toString(), mPasswordView.getText().toString())
-                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        Util.showProgress(home.this, mLoginFormView, mProgressView, true);
-                        if (!task.isSuccessful()) {
-                            Toast.makeText(home.this, task.getException().getMessage(), Toast.LENGTH_SHORT).show();
-                            mEmailView.requestFocus();
+                    .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                        @Override
+                        public void onComplete(@NonNull Task<AuthResult> task) {
+                            Util.showProgress(home.this, mLoginFormView, mProgressView, true);
+                            if (!task.isSuccessful()) {
+                                Toast.makeText(home.this, task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                                mEmailView.requestFocus();
+                            }
                         }
-                    }
-                });
+                    });
         }
 
         mPasswordView.setText("");
@@ -278,7 +245,7 @@ public class home extends AppCompatActivity
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
-            if(mAuth != null){
+            if (mAuth != null) {
                 mEmailView.setText(mAuth.getCurrentUser().getEmail());
 
                 mAuth.signOut();

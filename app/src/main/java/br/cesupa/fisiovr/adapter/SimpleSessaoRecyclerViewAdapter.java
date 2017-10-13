@@ -12,7 +12,6 @@ import com.google.gson.Gson;
 import java.util.ArrayList;
 import java.util.List;
 
-import br.cesupa.fisiovr.detail.ItemDetailActivity;
 import br.cesupa.fisiovr.R;
 import br.cesupa.fisiovr.detail.SessaoDetailActivity;
 import br.cesupa.fisiovr.dummy.SessaoContent;
@@ -26,7 +25,8 @@ public class SimpleSessaoRecyclerViewAdapter
 
     private List<SessaoContent.SessaoItem> mValues = new ArrayList<SessaoContent.SessaoItem>();
 
-    public SimpleSessaoRecyclerViewAdapter(){}
+    public SimpleSessaoRecyclerViewAdapter() {
+    }
 
     public void addItem(SessaoContent.SessaoItem item) {
         mValues.add(item);

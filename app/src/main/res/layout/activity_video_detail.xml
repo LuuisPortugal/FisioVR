@@ -42,10 +42,10 @@
 
         <TextView
             android:id="@+id/text_view_video_detail_activity"
+            style="?android:attr/textAppearanceLarge"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:padding="16dp"
-            style="?android:attr/textAppearanceLarge"/>
+            android:padding="16dp" />
     </android.support.v4.widget.NestedScrollView>
 
     <android.support.design.widget.FloatingActionButton
@@ -54,8 +54,9 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical|start"
         android:layout_margin="@dimen/fab_margin"
+        android:visibility="gone"
         app:layout_anchor="@+id/video_detail_container"
         app:layout_anchorGravity="top|end"
-        app:srcCompat="@android:drawable/stat_notify_chat" />
+        app:srcCompat="@android:drawable/stat_notify_sdcard" />
 
 </android.support.design.widget.CoordinatorLayout>
