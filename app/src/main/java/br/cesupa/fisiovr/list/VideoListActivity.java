@@ -13,13 +13,18 @@ import android.text.TextUtils;
 import android.view.Menu;
 import android.widget.Toast;
 
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.GenericTypeIndicator;
-import com.google.firebase.database.ValueEventListener;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
 
-import java.util.HashMap;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
 import java.util.List;
 
 import br.cesupa.fisiovr.R;
@@ -36,10 +41,10 @@ import br.com.zbra.androidlinq.delegate.Selector;
  * item details are presented side-by-side with a list of items
  * in a {@link home}.
  */
-public class VideoListActivity extends AppCompatActivity implements SearchView.OnQueryTextListener, ValueEventListener {
+public class VideoListActivity extends AppCompatActivity implements SearchView.OnQueryTextListener {
 
     SearchView searchView;
-    FirebaseDatabase database;
+    RequestQueue queueVolley;
     RecyclerView video_recycleview;
     List<VideoContent.VideoItem> videos;
     ProgressDialog progressDialog;
@@ -64,11 +69,84 @@ public class VideoListActivity extends AppCompatActivity implements SearchView.O
         progressDialog.setCancelable(false);
         progressDialog.show();
 
-        database = FirebaseDatabase.getInstance();
-        database.getReference("videos").addListenerForSingleValueEvent(this);
-
         video_recycleview = (RecyclerView) findViewById(R.id.video_recycleview);
+
+        queueVolley = Volley.newRequestQueue(this);
+        queueVolley.add(
+                new JsonObjectRequest(Request.Method.GET, "https://www.googleapis.com/youtube/v3/search?key=AIzaSyBwHq8UHDRTAFtGTt6aTYNyCpZXPx-GH3U&channelId=UCzuqhhs6NWbgTzMuM09WKDQ&part=snippet", null,
+                        new Response.Listener<JSONObject>() {
+                            @Override
+                            public void onResponse(JSONObject responsePLaylist) {
+                                try {
+                                    JSONArray itens = responsePLaylist.getJSONArray("items");
+                                    for (int i = 0; i < itens.length(); i++) {
+                                        JSONObject playlist = itens.getJSONObject(i);
+                                        String playlistId = playlist.getJSONObject("snippet").getString("channelId");
+                                        queueVolley.add(
+                                                new JsonObjectRequest(Request.Method.GET,
+                                                        "https://www.googleapis.com/youtube/v3/playlistItems?key=AIzaSyBwHq8UHDRTAFtGTt6aTYNyCpZXPx-GH3U&part=snippet&playlistId=" + playlistId, null,
+                                                        new Response.Listener<JSONObject>() {
+                                                            @Override
+                                                            public void onResponse(JSONObject videoPLaylist) {
+                                                                try {
+                                                                    JSONArray itemsPlaylist = videoPLaylist.getJSONArray("items");
+                                                                    for (int i = 0; i < itemsPlaylist.length(); i++) {
+                                                                        JSONObject item = itemsPlaylist.getJSONObject(i);
+                                                                        JSONObject snippet = item.getJSONObject("snippet");
+                                                                        videos.add(
+                                                                                new VideoContent.VideoItem(
+                                                                                        snippet.getJSONObject("resourceId").getString("videoId"),
+                                                                                        snippet.getString("title"),
+                                                                                        snippet.getJSONObject("thumbnails").getJSONObject("default").getString("url"),
+                                                                                        snippet.getString("publishedAt"),
+                                                                                        0,
+                                                                                        new ArrayList<String>(),
+                                                                                        new ArrayList<String>(),
+                                                                                        "",
+                                                                                        "",
+                                                                                        ""
+                                                                                )
+                                                                        );
+                                                                    }
+                                                                } catch (JSONException error) {
+                                                                    error.printStackTrace();
+                                                                    progressDialog.dismiss();
+                                                                    Toast.makeText(VideoListActivity.this, error.getMessage(), Toast.LENGTH_LONG).show();
+                                                                }
+
+                                                                String querySearch = searchView != null ? searchView.getQuery().toString() : "";
+                                                                updateAdapterByQuery(querySearch);
+                                                            }
+                                                        }, new Response.ErrorListener() {
+                                                    @Override
+                                                    public void onErrorResponse(VolleyError error) {
+                                                        error.printStackTrace();
+                                                        progressDialog.dismiss();
+                                                        Toast.makeText(VideoListActivity.this, error.getMessage(), Toast.LENGTH_LONG).show();
+                                                    }
+                                                }
+                                                )
+                                        );
+                                    }
+                                } catch (JSONException error) {
+                                    error.printStackTrace();
+                                    progressDialog.dismiss();
+                                    Toast.makeText(VideoListActivity.this, error.getMessage(), Toast.LENGTH_LONG).show();
+                                }
+                            }
+                        }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        error.printStackTrace();
+                        progressDialog.dismiss();
+                        Toast.makeText(VideoListActivity.this, error.getMessage(), Toast.LENGTH_LONG).show();
+                    }
+                }
+                )
+        );
+
     }
+
 
     private void updateAdapterByQuery(final String query) {
         if (TextUtils.isEmpty(query)) {
@@ -98,37 +176,33 @@ public class VideoListActivity extends AppCompatActivity implements SearchView.O
         progressDialog.dismiss();
     }
 
-    @Override
-    public void onDataChange(DataSnapshot dataSnapshot) {
-        videos = Linq.stream(
-                dataSnapshot
-                        .getValue(new GenericTypeIndicator<HashMap<String, VideoContent.VideoItem>>() {
-                        })
-                        .values()
-        )
-                .where(new Predicate<VideoContent.VideoItem>() {
-                    @Override
-                    public boolean apply(VideoContent.VideoItem videoItem) {
-                        return videoItem.thumbnail != null && !videoItem.thumbnail.isEmpty();
-                    }
-                })
-                .orderBy(new Selector<VideoContent.VideoItem, String>() {
-                    @Override
-                    public String select(VideoContent.VideoItem videoItem) {
-                        return videoItem.title;
-                    }
-                })
-                .toList();
+    /*
+        @Override
+        public void onDataChange(DataSnapshot dataSnapshot) {
+            videos = Linq.stream(
+                    dataSnapshot
+                            .getValue(new GenericTypeIndicator<HashMap<String, VideoContent.VideoItem>>() {
+                            })
+                            .values()
+            )
+                    .where(new Predicate<VideoContent.VideoItem>() {
+                        @Override
+                        public boolean apply(VideoContent.VideoItem videoItem) {
+                            return videoItem.thumbnail != null && !videoItem.thumbnail.isEmpty();
+                        }
+                    })
+                    .orderBy(new Selector<VideoContent.VideoItem, String>() {
+                        @Override
+                        public String select(VideoContent.VideoItem videoItem) {
+                            return videoItem.title;
+                        }
+                    })
+                    .toList();
 
-        String querySearch = searchView != null ? searchView.getQuery().toString() : "";
-        updateAdapterByQuery(querySearch);
-    }
-
-    @Override
-    public void onCancelled(DatabaseError error) {
-        Toast.makeText(VideoListActivity.this, error.toException().getMessage(), Toast.LENGTH_SHORT).show();
-    }
-
+            String querySearch = searchView != null ? searchView.getQuery().toString() : "";
+            updateAdapterByQuery(querySearch);
+        }
+    */
     @Override
     public boolean onQueryTextSubmit(String query) {
         return false;
@@ -149,14 +223,5 @@ public class VideoListActivity extends AppCompatActivity implements SearchView.O
         searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
         searchView.setOnQueryTextListener(this);
         return true;
-    }
-
-    @Override
-    protected void onDestroy() {
-        if (database != null) {
-            database.goOffline();
-        }
-
-        super.onDestroy();
     }
 }
