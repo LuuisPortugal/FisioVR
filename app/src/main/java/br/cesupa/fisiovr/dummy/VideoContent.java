@@ -25,7 +25,7 @@ public class VideoContent {
         public String title;
         public String thumbnail;
         public String upload_date;
-        public Integer view_count;
+        public String view_count;
         public List<String> tags;
         public List<String> categories;
         public String description;
@@ -35,7 +35,7 @@ public class VideoContent {
         public VideoItem() {
         }
 
-        public VideoItem(String id, String title, String thumbnail, String upload_date, Integer view_count, ArrayList<String> tags, ArrayList<String> categories, String description, String uploader_id, String uploader) {
+        public VideoItem(String id, String title, String thumbnail, String upload_date, String view_count, ArrayList<String> tags, ArrayList<String> categories, String description, String uploader_id, String uploader) {
             this.id = id;
             this.title = title;
             this.thumbnail = thumbnail;
