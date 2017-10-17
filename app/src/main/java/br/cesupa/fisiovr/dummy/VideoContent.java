@@ -21,36 +21,57 @@ public class VideoContent {
     public static final Map<String, VideoItem> ITEM_MAP = new HashMap<String, VideoItem>();
 
     public static class VideoItem {
-        public String id;
-        public String title;
-        public String thumbnail;
-        public String upload_date;
-        public String view_count;
-        public List<String> tags;
-        public List<String> categories;
-        public String description;
-        public String uploader_id;
-        public String uploader;
 
+        public String kind;
+        public String etag;
+        public String id;
+        public VideoItem[] items;
+        public HashMap<String, Integer> pageInfo;
+        public SnippetVideoItem snippet;
+        public StatisticsVideoItem statistics;
         public VideoItem() {
+
         }
 
-        public VideoItem(String id, String title, String thumbnail, String upload_date, String view_count, ArrayList<String> tags, ArrayList<String> categories, String description, String uploader_id, String uploader) {
+        public VideoItem(String kind, String etag, String id, VideoItem[] items, HashMap<String, Integer> pageInfo, SnippetVideoItem snippet, StatisticsVideoItem statistics) {
+            this.kind = kind;
+            this.etag = etag;
             this.id = id;
-            this.title = title;
-            this.thumbnail = thumbnail;
-            this.upload_date = upload_date;
-            this.view_count = view_count;
-            this.tags = tags;
-            this.categories = categories;
-            this.description = description;
-            this.uploader_id = uploader_id;
-            this.uploader = uploader;
+            this.items = items;
+            this.pageInfo = pageInfo;
+            this.snippet = snippet;
+            this.statistics = statistics;
         }
 
         @Override
         public String toString() {
             return new Gson().toJson(this);
+        }
+
+        public class SnippetVideoItem {
+            public String publishedAt;
+            public String channelId;
+            public String title;
+            public String description;
+            public String channelTitle;
+            public String categoryId;
+            public String[] tags;
+            public HashMap<String, String> resourceId;
+            public HashMap<String, ThumbnailsItens> thumbnails;
+
+            public class ThumbnailsItens {
+                public String url;
+                public int width;
+                public int height;
+            }
+        }
+
+        public class StatisticsVideoItem {
+            public String viewCount;
+            public String likeCount;
+            public String dislikeCount;
+            public String favoriteCount;
+            public String commentCount;
         }
     }
 }

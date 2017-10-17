@@ -3,6 +3,7 @@ package br.cesupa.fisiovr.adapter;
 import android.content.Context;
 import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -51,14 +52,14 @@ public class SimpleVideoRecyclerViewAdapter extends RecyclerView.Adapter<SimpleV
         holder.mItem = mValues.get(position);
 
         Picasso.with(this.c)
-                .load(mValues.get(position).thumbnail)
+                .load(mValues.get(position).snippet.thumbnails.get("default").url)
                 .resize(180, 180)
                 .centerCrop()
                 .transform(new CircleTransform())
                 .into(holder.image);
 
-        holder.title.setText(mValues.get(position).title);
-        holder.autor.setText(mValues.get(position).uploader);
+        holder.title.setText(mValues.get(position).snippet.title);
+        holder.autor.setText(TextUtils.substring(mValues.get(position).snippet.description, 0, 75));
 
         holder.mView.setOnClickListener(new View.OnClickListener() {
             @Override

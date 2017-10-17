@@ -61,17 +61,17 @@ public class VideoDetailActivity extends AppCompatActivity {
                         String ext = MimeTypeMap.getSingleton().getExtensionFromMimeType(downloadMimeType);
                         if (Util.renameFile(new File(Environment.getExternalStoragePublicDirectory(pathDownload), mItem.id), mItem.id.concat("." + ext)).exists()) {
                             Toast.makeText(VideoDetailActivity.this, "Download finalizado com Sucesso", Toast.LENGTH_LONG).show();
-                        } else {
-                            Toast.makeText(VideoDetailActivity.this, "Falha ao configurar o Arquivo", Toast.LENGTH_LONG).show();
-                        }
                     } else {
-                        Toast.makeText(VideoDetailActivity.this, "Falha ao fazer o Download do Arquivo", Toast.LENGTH_LONG).show();
+                            Toast.makeText(VideoDetailActivity.this, "Falha ao configurar o Arquivo", Toast.LENGTH_LONG).show();
                     }
                 } else {
-                    Toast.makeText(VideoDetailActivity.this, "Falha ao capturar informações do Video", Toast.LENGTH_LONG).show();
+                        Toast.makeText(VideoDetailActivity.this, "Falha ao fazer o Download do Arquivo", Toast.LENGTH_LONG).show();
                 }
-                cursor.close();
+                } else {
+                    Toast.makeText(VideoDetailActivity.this, "Falha ao capturar informações do Video", Toast.LENGTH_LONG).show();
             }
+                cursor.close();
+        }
         }
     };
     private ProgressDialog progressDialog;
@@ -103,10 +103,8 @@ public class VideoDetailActivity extends AppCompatActivity {
             mItem = gson.fromJson(getIntent().getExtras().getString(ARG_VIDEO_ID), VideoContent.VideoItem.class);
 
             if (mItem != null) {
-                actionBar.setTitle(mItem.title);
-                ((TextView) findViewById(R.id.text_view_video_detail_activity)).setText(mItem.description);
-
-                downloadManager = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
+                actionBar.setTitle(mItem.snippet.title);
+                ((TextView) findViewById(R.id.text_view_video_detail_activity)).setText(mItem.snippet.description);
 
                 fab.setVisibility(View.VISIBLE);
                 fab.setOnClickListener(new View.OnClickListener() {
@@ -127,10 +125,10 @@ public class VideoDetailActivity extends AppCompatActivity {
                                                          request.setDestinationInExternalPublicDir(pathDownload, mItem.id);
                                                          request.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI);
                                                          request.allowScanningByMediaScanner();
-                                                         request.setTitle(mItem.title);
+                                                         request.setTitle(mItem.snippet.title);
 
                                                          registerReceiver(ACTION_DOWNLOAD_COMPLETE_BroadcastReceiver, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
-                                                         idVideoYoutubeURI = downloadManager.enqueue(request);
+                                                         idVideoYoutubeURI = ((DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE)).enqueue(request);
 
                                                          Toast.makeText(VideoDetailActivity.this, "Por motivo de segurança, só será permitido fazer o Download do vídeo por uma rede WIFI", Toast.LENGTH_LONG).show();
                                                      } else {

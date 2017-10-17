@@ -195,6 +195,7 @@ public class home extends AppCompatActivity
                         public void onComplete(@NonNull Task<AuthResult> task) {
                             Util.showProgress(home.this, mLoginFormView, mProgressView, true);
                             if (!task.isSuccessful()) {
+                                updateView(task.getResult().getUser());
                                 Toast.makeText(home.this, task.getException().getMessage(), Toast.LENGTH_SHORT).show();
                                 mEmailView.requestFocus();
                             }

@@ -16,30 +16,21 @@ import android.widget.Toast;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.google.gson.Gson;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import br.cesupa.fisiovr.R;
 import br.cesupa.fisiovr.adapter.SimpleVideoRecyclerViewAdapter;
+import br.cesupa.fisiovr.dummy.PlaylistContent;
 import br.cesupa.fisiovr.dummy.VideoContent;
-import br.cesupa.fisiovr.home;
 import br.com.zbra.androidlinq.Linq;
 import br.com.zbra.androidlinq.delegate.Predicate;
 import br.com.zbra.androidlinq.delegate.Selector;
 
-/**
- * An activity representing a single Item detail screen. This
- * activity is only used narrow width devices. On tablet-size devices,
- * item details are presented side-by-side with a list of items
- * in a {@link home}.
- */
 public class VideoListActivity extends AppCompatActivity implements SearchView.OnQueryTextListener {
 
     SearchView searchView;
@@ -68,113 +59,138 @@ public class VideoListActivity extends AppCompatActivity implements SearchView.O
         progressDialog.show();
 
         video_recycleview = (RecyclerView) findViewById(R.id.video_recycleview);
+        refreshRecycleView();
+    }
 
+    @Override
+    public boolean onQueryTextSubmit(String query) {
+        return false;
+    }
+
+    @Override
+    public boolean onQueryTextChange(final String newText) {
+        updateAdapterByQuery(newText);
+        return false;
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.videos, menu);
+
+        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+        searchView = (SearchView) menu.findItem(R.id.app_bar_search_videos).getActionView();
+        searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
+        searchView.setOnQueryTextListener(this);
+        return true;
+    }
+
+    public void refreshRecycleView() {
         Volley.newRequestQueue(this).add(
-                new JsonObjectRequest(Request.Method.GET, "https://www.googleapis.com/youtube/v3/search?key=AIzaSyBwHq8UHDRTAFtGTt6aTYNyCpZXPx-GH3U&channelId=UCzuqhhs6NWbgTzMuM09WKDQ&part=snippet", null,
-                        new Response.Listener<JSONObject>() {
+                new StringRequest(Request.Method.GET, "https://www.googleapis.com/youtube/v3/search?key=AIzaSyBwHq8UHDRTAFtGTt6aTYNyCpZXPx-GH3U&channelId=UCzuqhhs6NWbgTzMuM09WKDQ&part=snippet",
+                        new Response.Listener<String>() {
                             @Override
-                            public void onResponse(JSONObject responseChannel) {
+                            public void onResponse(String responseChannelString) {
                                 try {
-                                    JSONArray itens = responseChannel.getJSONArray("items");
-                                    for (int i = 0; i < itens.length(); i++) {
-                                        JSONObject playlist = itens.getJSONObject(i);
-                                        JSONObject id = playlist.getJSONObject("id");
+                                    PlaylistContent.Playlist responseChannel = new Gson().fromJson(responseChannelString, PlaylistContent.Playlist.class);
+                                    for (PlaylistContent.Playlist playlist :
+                                            Linq
+                                                    .stream(responseChannel.items)
+                                                    .where(new Predicate<PlaylistContent.Playlist>() {
+                                                        @Override
+                                                        public boolean apply(PlaylistContent.Playlist playlist) {
+                                                            return playlist.id.get("kind").equals("youtube#playlist");
+                                                        }
+                                                    })
+                                                    .toList()
+                                            ) {
+                                        getItemPlaylist(playlist.id.get("playlistId"));
+                            }
+                                } catch (Exception error) {
+                                    error.printStackTrace();
+                                    progressDialog.dismiss();
+                                    Toast.makeText(VideoListActivity.this, error.getMessage(), Toast.LENGTH_LONG).show();
+                                }
+                            }
+                        }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        error.printStackTrace();
+                        progressDialog.dismiss();
+                        Toast.makeText(VideoListActivity.this, error.getMessage(), Toast.LENGTH_LONG).show();
+                    }
+                }
+                )
+        );
+    }
 
-                                        if (id.getString("kind").equals("youtube#playlist"))
-                                            getItemPlaylist(id.getString("playlistId"));
+    public void getItemPlaylist(String playlistID) {
+        System.out.println(playlistID);
+        Volley.newRequestQueue(this).add(
+                new StringRequest(Request.Method.GET,
+                        "https://www.googleapis.com/youtube/v3/playlistItems?key=AIzaSyBwHq8UHDRTAFtGTt6aTYNyCpZXPx-GH3U&part=snippet&playlistId=" + playlistID,
+                        new Response.Listener<String>() {
+                            @Override
+                            public void onResponse(String responsePlaylistString) {
+                                try {
+                                    VideoContent.VideoItem responsePlaylist = new Gson().fromJson(responsePlaylistString, VideoContent.VideoItem.class);
+                                    for (VideoContent.VideoItem videoItem :
+                                            Linq
+                                                    .stream(responsePlaylist.items)
+                                                    .where(new Predicate<VideoContent.VideoItem>() {
+                                                        @Override
+                                                        public boolean apply(VideoContent.VideoItem videoItem) {
+                                                            return videoItem.snippet.resourceId.get("kind").equals("youtube#video");
+                                                        }
+                                                    })
+                                                    .toList()
+                                            ) {
+                                        getVideoItemPlaylist(videoItem.snippet.resourceId.get("videoId"));
+                            }
+                                } catch (Exception error) {
+                                    error.printStackTrace();
+                                    progressDialog.dismiss();
+                                    Toast.makeText(VideoListActivity.this, error.getMessage(), Toast.LENGTH_LONG).show();
+                                }
+                            }
+                        }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        error.printStackTrace();
+                        progressDialog.dismiss();
+                        Toast.makeText(VideoListActivity.this, error.getMessage(), Toast.LENGTH_LONG).show();
+                    }
+                }
+                )
+        );
+    }
+
+    private void getVideoItemPlaylist(String videoID) {
+        System.out.println(videoID);
+        Volley.newRequestQueue(this).add(
+                new StringRequest(Request.Method.GET,
+                        "https://www.googleapis.com/youtube/v3/videos?key=AIzaSyBwHq8UHDRTAFtGTt6aTYNyCpZXPx-GH3U&part=snippet,statistics&id=" + videoID,
+                        new Response.Listener<String>() {
+                            @Override
+                            public void onResponse(String responseVideoString) {
+                                try {
+                                    VideoContent.VideoItem responseVideo = new Gson().fromJson(responseVideoString, VideoContent.VideoItem.class);
+                                    for (VideoContent.VideoItem videoItem :
+                                            Linq
+                                                    .stream(responseVideo.items)
+                                                    .where(new Predicate<VideoContent.VideoItem>() {
+                                                        @Override
+                                                        public boolean apply(VideoContent.VideoItem videoItem) {
+                                                            return videoItem.kind.equals("youtube#video");
+                                                        }
+                                                    })
+                                                    .toList()
+                                            ) {
+                                        videos.add(videoItem);
                             }
 
                                     String querySearch = searchView != null ? searchView.getQuery().toString() : "";
                                     updateAdapterByQuery(querySearch);
-                                } catch (JSONException error) {
-                                    error.printStackTrace();
-                                    progressDialog.dismiss();
-                                    Toast.makeText(VideoListActivity.this, error.getMessage(), Toast.LENGTH_LONG).show();
-                                }
-                            }
-                        }, new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        error.printStackTrace();
-                        progressDialog.dismiss();
-                        Toast.makeText(VideoListActivity.this, error.getMessage(), Toast.LENGTH_LONG).show();
-                    }
-                }
-                )
-        );
-
-        String querySearch = searchView != null ? searchView.getQuery().toString() : "";
-        updateAdapterByQuery(querySearch);
-    }
-
-    public void getItemPlaylist(String playlistID) {
-        Volley.newRequestQueue(this).add(
-                new JsonObjectRequest(Request.Method.GET,
-                        "https://www.googleapis.com/youtube/v3/playlistItems?key=AIzaSyBwHq8UHDRTAFtGTt6aTYNyCpZXPx-GH3U&part=snippet&playlistId=" + playlistID, null,
-                        new Response.Listener<JSONObject>() {
-                            @Override
-                            public void onResponse(JSONObject responsePLaylist) {
-                                try {
-                                    JSONArray itemsPlaylist = responsePLaylist.getJSONArray("items");
-                                    for (int i = 0; i < itemsPlaylist.length(); i++) {
-                                        JSONObject item = itemsPlaylist.getJSONObject(i);
-                                        JSONObject snippet = item.getJSONObject("snippet");
-                                        JSONObject resourceId = snippet.getJSONObject("resourceId");
-
-                                        if (resourceId.getString("kind").equals("youtube#video"))
-                                            getVideoPlaylist(resourceId.getString("videoId"));
-                                    }
-                                } catch (JSONException error) {
-                                    error.printStackTrace();
-                                    progressDialog.dismiss();
-                                    Toast.makeText(VideoListActivity.this, error.getMessage(), Toast.LENGTH_LONG).show();
-                                }
-                            }
-                        }, new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        error.printStackTrace();
-                        progressDialog.dismiss();
-                        Toast.makeText(VideoListActivity.this, error.getMessage(), Toast.LENGTH_LONG).show();
-                    }
-                }
-                )
-        );
-    }
-
-    private void getVideoPlaylist(String videoID) {
-        Volley.newRequestQueue(this).add(
-                new JsonObjectRequest(Request.Method.GET,
-                        "https://www.googleapis.com/youtube/v3/videos?key=AIzaSyBwHq8UHDRTAFtGTt6aTYNyCpZXPx-GH3U&part=snippet,statistics,status&id=" + videoID, null,
-                        new Response.Listener<JSONObject>() {
-                            @Override
-                            public void onResponse(JSONObject responseVideo) {
-                                try {
-                                    JSONArray itemsPlaylist = responseVideo.getJSONArray("items");
-                                    for (int i = 0; i < itemsPlaylist.length(); i++) {
-                                        JSONObject item = itemsPlaylist.getJSONObject(i);
-                                        JSONObject statistics = item.getJSONObject("statistics");
-                                        JSONObject snippet = item.getJSONObject("snippet");
-                                        JSONObject thumbnails = snippet.getJSONObject("thumbnails");
-                                        String tags = snippet.getString("tags");
-
-                                        assert videos != null;
-                                        videos.add(
-                                                new VideoContent.VideoItem(
-                                                        item.getString("id"),
-                                                        snippet.getString("title"),
-                                                        thumbnails.getJSONObject("default").getString("url"),
-                                                        snippet.getString("publishedAt"),
-                                                        statistics.getString("viewCount"),
-                                                        new ArrayList<String>(),
-                                                        new ArrayList<String>(),
-                                                        snippet.getString("description"),
-                                                        "",
-                                                        ""
-                                                )
-                                        );
-                                    }
-                                } catch (JSONException error) {
+                                } catch (Exception error) {
                                     error.printStackTrace();
                                     progressDialog.dismiss();
                                     Toast.makeText(VideoListActivity.this, error.getMessage(), Toast.LENGTH_LONG).show();
@@ -203,13 +219,13 @@ public class VideoListActivity extends AppCompatActivity implements SearchView.O
                             .where(new Predicate<VideoContent.VideoItem>() {
                                 @Override
                                 public boolean apply(VideoContent.VideoItem videoItem) {
-                                    return videoItem.title.toLowerCase().contains(query.toLowerCase());
+                                    return videoItem.snippet.title.toLowerCase().contains(query.toLowerCase());
                                 }
                             })
                             .orderBy(new Selector<VideoContent.VideoItem, String>() {
                                 @Override
                                 public String select(VideoContent.VideoItem videoItem) {
-                                    return videoItem.title;
+                                    return videoItem.snippet.title;
                                 }
                             })
                             .toList()
@@ -218,27 +234,5 @@ public class VideoListActivity extends AppCompatActivity implements SearchView.O
         }
 
         progressDialog.dismiss();
-    }
-
-    @Override
-    public boolean onQueryTextSubmit(String query) {
-        return false;
-    }
-
-    @Override
-    public boolean onQueryTextChange(final String newText) {
-        updateAdapterByQuery(newText);
-        return false;
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.videos, menu);
-
-        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-        searchView = (SearchView) menu.findItem(R.id.app_bar_search_videos).getActionView();
-        searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
-        searchView.setOnQueryTextListener(this);
-        return true;
     }
 }
